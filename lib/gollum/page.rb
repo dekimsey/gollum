@@ -257,14 +257,12 @@ module Gollum
     #
     # Returns an Array of Grit::Commit.
     def versions(options = {})
+      pagination = log_pagination_options(options)
       if options[:follow]
-        options[:pretty] = 'raw'
-        options.delete :max_count
-        options.delete :skip
-        log = @wiki.repo.git.native "log", options, @wiki.ref, "--", @path
-        Grit::Commit.list_from_string(@wiki.repo, log)
+        commits = @wiki.repo.log(@wiki.ref, @path, {:follow => true})
+        commits.slice(pagination[:skip] || 0, pagination[:max_count])
       else
-        @wiki.repo.log(@wiki.ref, @path, log_pagination_options(options))
+        @wiki.repo.log(@wiki.ref, @path, pagination)
       end
     end
 

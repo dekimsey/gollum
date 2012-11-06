@@ -245,7 +245,7 @@ module Precious
     get '/history/*' do
       @page        = wiki_page(params[:splat].first).page
       @page_num    = [params[:page].to_i, 1].max
-      @versions    = @page.versions :page => @page_num
+      @versions    = @page.versions(:page => @page_num, :follow => true)
       mustache :history
     end
 
