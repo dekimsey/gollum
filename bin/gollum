@@ -69,6 +69,10 @@ opts = OptionParser.new do |opts|
     wiki_options[:mathjax] = true
   end
 
+  opts.on("--no-rename-history", "Disables following renames in the history view. Useful for large or slow repositories.") do
+    wiki_options[:rename_history] = false
+  end
+
   opts.on("--show-all", "Shows all files in file view. By default only valid pages are shown.") do
     wiki_options[:show_all] = true
   end

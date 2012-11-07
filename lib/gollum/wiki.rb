@@ -186,6 +186,7 @@ module Gollum
       @mathjax = options[:mathjax] || false
       @show_all = options[:show_all] || false
       @collapse_tree = options[:collapse_tree] || false
+      @rename_history = options.fetch(:rename_history, true)
     end
 
     # Public: check whether the wiki's git repo exists on the filesystem.
@@ -593,6 +594,9 @@ module Gollum
 
     # Toggles mathjax.
     attr_reader :mathjax
+
+    # Start with collapsed file view. Default: true
+    attr_reader :rename_history
 
     # Toggles showing all files in files view. Default is false.
     # When false, only valid pages in the git repo are displayed.
