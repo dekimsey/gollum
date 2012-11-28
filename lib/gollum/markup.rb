@@ -36,6 +36,7 @@ module Gollum
       @codemap = {}
       @wsdmap  = {}
       @premap  = {}
+      @cssmap  = {}
       @toc = nil
       @metadata = nil
       @to_xml = { :save_with => Nokogiri::XML::Node::SaveOptions::DEFAULT_XHTML ^ 1, :indent => 0, :encoding => 'UTF-8' }
@@ -60,6 +61,7 @@ module Gollum
       data = extract_code(data)
       data = extract_wsd(data)
       data = extract_tags(data)
+      data = extract_css(data)
       begin
         data = GitHub::Markup.render(@name, data)
         if data.nil?
@@ -80,6 +82,7 @@ module Gollum
       # formatting will create extra spaces in pre tags.
       # https://github.com/sparklemotion/nokogiri/issues/782
       # DEFAULT_HTML encodes unicode so XHTML is used for proper unicode support in href.
+      doc = process_css(doc)
       data = doc.to_xml( @to_xml )
 
       data = process_toc_tags(data)
@@ -90,7 +93,7 @@ module Gollum
 
       data
     end
-
+    
     # Inserts header anchors and creates TOC
     #
     # doc - Nokogiri parsed document
@@ -430,6 +433,37 @@ module Gollum
         [@wiki.page(cname[0...pos]), cname[pos..-1]]
       end
     end
+
+    def extract_css data
+        data.gsub /^[ \t]*\{\.(-?[_a-zA-Z]+[_a-zA-Z0-9-]*)}\r?$/m do
+            class_name = $1
+            id = "css-" + Digest::SHA1.hexdigest(class_name)
+            @cssmap[id] = class_name
+            "<p class='__marker #{id}'>save me</p>"
+        end
+    end
+
+    def process_css doc
+      return doc if doc.nil? || @cssmap.size.zero?
+      doc.css("p").each do |element|
+        if element.content() == ""
+          element.remove()
+        end
+      end
+
+      @cssmap.each do |id, class_name|
+        doc.css("p.#{id} + *").each do |element|
+          element_class = element['class'] || ""
+          element_class += " #{class_name}"
+          element['class'] = element_class
+        end
+      end
+      doc.css("p.__marker").each do |e| e.remove end
+
+      doc
+
+    end
+
 
     #########################################################################
     #
