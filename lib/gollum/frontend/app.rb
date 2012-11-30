@@ -142,24 +142,39 @@ module Precious
       end
     end
 
+    post '/rename/*' do
+      wikip     = wiki_page(params[:splat].first)
+      return if wikip.nil?
+      wiki      = wikip.wiki
+      page      = wiki.paged(wikip.name, wikip.path, exact = true)
+      rename    = params[:rename]
+
+      committer = Gollum::Committer.new(wiki, commit_message)
+      commit    = {:committer => committer}
+
+      wiki.rename_page(page, rename, commit)
+      committer.commit
+
+      wikip = wiki_page(rename)
+      page = wiki.paged(wikip.name, wikip.path, exact = true)
+      return if page.nil?
+      redirect to("/#{page.escaped_url_path}")
+    end
+
     post '/edit/*' do
       path      = '/' + clean_url(sanitize_empty_params(params[:path])).to_s
       page_name = CGI.unescape(params[:page])
       wiki      = wiki_new
       page      = wiki.paged(page_name, path, exact = true)
       return if page.nil?
-      rename    = params[:rename].to_url if params[:rename]
-      name      = rename || page.name
       committer = Gollum::Committer.new(wiki, commit_message)
       commit    = {:committer => committer}
 
-      update_wiki_page(wiki, page, params[:content], commit, name, params[:format])
+      update_wiki_page(wiki, page, params[:content], commit, page.name, params[:format])
       update_wiki_page(wiki, page.header,  params[:header],  commit) if params[:header]
       update_wiki_page(wiki, page.footer,  params[:footer],  commit) if params[:footer]
       update_wiki_page(wiki, page.sidebar, params[:sidebar], commit) if params[:sidebar]
       committer.commit
-
-      page = wiki.page(rename) if rename
 
       redirect to("/#{page.escaped_url_path}") unless page.nil?
     end
