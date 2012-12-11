@@ -306,7 +306,6 @@ module Precious
         @page = page
         @name = name
         @content = page.formatted_data
-        @editable = true
         mustache :page
       else
         halt 404
