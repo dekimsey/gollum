@@ -185,6 +185,24 @@ context "Frontend" do
     assert_not_equal page_1.version.sha, page_2.version.sha
   end
 
+  test "renames page relative in subdirectory" do
+    page_1 = @wiki.paged("H", "G")
+    assert_not_equal page_1, nil
+    post "/rename/G/H", :rename => "K/C", :message => 'def'
+
+    follow_redirect!
+    assert_equal '/G/K/C', last_request.fullpath
+    assert last_response.ok?
+
+    @wiki.clear_cache
+    assert_nil @wiki.paged("H", "G")
+    page_2 = @wiki.paged('C', 'G/K')
+    assert_equal "INITIAL\n\nSPAM2\n", page_2.raw_data
+    assert_equal 'def', page_2.version.message
+    assert_not_equal page_1.version.sha, page_2.version.sha
+  end
+
+
   test "creates page" do
     post "/create", :content => 'abc', :page => "D",
       :format => 'markdown', :message => 'def'

@@ -547,17 +547,7 @@ context "Renames directory traversal" do
     assert !res, "NOOP rename did not abort"
   end
 
-  test "rename page relative directory no-act" do
-    # Make sure renames don't do anything if the name is the same and we are in a subdirectory.
-    cd = {:message => "def"}
-    source = @wiki.paged("H", "G")
-
-    # G/H.md => G/H.md
-    res = @wiki.rename_page(source, "H", cd)
-    assert !res, "NOOP rename did not abort"
-  end
-
-  test "rename page relative directory" do
+  test "rename page without directories" do
     # Make sure renames work with relative paths.
     cd = {:message => "def"}
     source = @wiki.page("B")
@@ -569,22 +559,18 @@ context "Renames directory traversal" do
     renamed_ok(source, @wiki.page("C"))
   end
 
-  test "rename page relative directory with subdirs" do
+  test "rename page with subdirs" do
     # Make sure renames in subdirectories happen ok
     cd = {:message => "def"}
     source = @wiki.paged("H", "G")
 
     # G/H.md => G/F.md
-    @wiki.rename_page(source, "F", cd)
+    @wiki.rename_page(source, "G/F", cd)
 
     renamed_ok(source, @wiki.paged("F", "G"))
   end
 
-  ##
-  # Test absolute directory paths
-  ##
-
-  test "rename page no-act" do
+  test "rename page absolute path is still no-act" do
     # Make sure renames don't do anything if the name is the same.
     cd = {:message => "def"}
 
@@ -593,7 +579,7 @@ context "Renames directory traversal" do
     assert !res, "NOOP rename did not abort"
   end
 
-  test "rename page absolute directory no-act" do
+  test "rename page absolute path NOOPs ok" do
     # Make sure renames don't do anything if the name is the same and we are in a subdirectory.
     cd = {:message => "def"}
     source = @wiki.paged("H", "G")
@@ -626,7 +612,7 @@ context "Renames directory traversal" do
     renamed_ok(source, @wiki.paged("F", "G"))
   end
 
-  test "rename page relative directory with subdir creation" do
+  test "rename page relative directory with new dir creation" do
     # Make sure renames in subdirectories create more subdirectories ok
     cd = {:message => "def"}
     source = @wiki.paged("H", "G")
@@ -634,7 +620,7 @@ context "Renames directory traversal" do
     # G/H.md => G/K/F.md
     assert_not_equal k = @wiki.rename_page(source, "K/F", cd), false
 
-    new_page = @wiki.paged("F", "G/K")
+    new_page = @wiki.paged("F", "K")
     assert_not_equal new_page, nil
     renamed_ok(source, new_page)
   end

@@ -149,10 +149,25 @@ module Precious
       page      = wiki.paged(wikip.name, wikip.path, exact = true)
       rename    = params[:rename]
 
+      # Fixup the rename if it is a relative path
+      # In 1.8.7 rename[0] != rename[0..0]
+      if rename[0..0] != '/'
+        source_dir = ::File.dirname(page.path)
+        source_dir = '' if source_dir == '.'
+        (target_dir, target_name) = ::File.split(rename)
+        target_dir = target_dir == '' ? source_dir : "#{source_dir}/#{target_dir}"
+        rename = "#{target_dir}/#{target_name}"
+      end
+
       committer = Gollum::Committer.new(wiki, commit_message)
       commit    = {:committer => committer}
 
-      wiki.rename_page(page, rename, commit)
+      success = wiki.rename_page(page, rename, commit)
+      if !success
+          # This occurs on NOOPs, for example renaming A => A
+          redirect to("/#{page.escaped_url_path}")
+          return
+      end
       committer.commit
 
       wikip = wiki_page(rename)

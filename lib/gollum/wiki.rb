@@ -311,7 +311,7 @@ module Gollum
     # Public: Rename an existing page without altering content.
     #
     # page   - The Gollum::Page to update.
-    # rename - The String extension-less name of the page.
+    # rename - The String extension-less full path of the page (leading '/' is ignored).
     # commit - The commit Hash details:
     #          :message   - The String commit message.
     #          :name      - The String author full name.
@@ -325,25 +325,18 @@ module Gollum
     #
     # Returns the String SHA1 of the newly written version, or the
     # Gollum::Committer instance if this is part of a batch update.
+    # Returns false if the operation is a NOOP.
     def rename_page(page, rename, commit = {})
       (target_dir, target_name) = ::File.split(rename)
       (source_dir, source_name) = ::File.split(page.path)
       source_name = page.filename_stripped
 
-      # Slice off the leading / if it exists
-      target_dir = target_dir.gsub(/^\//,'')
-
       # File.split gives us relative paths with ".", commiter.add_to_index doesn't like that.
       target_dir = '' if target_dir == '.'
       source_dir = '' if source_dir == '.'
+      target_dir = target_dir.gsub(/^\//, '')
 
-      # This is a relative path.
-      # In 1.8.7 rename[0] != rename[0..0]
-      if rename[0..0] != '/'
-        target_dir = target_dir == '' ? source_dir : "#{source_dir}/#{target_dir}"
-      end
-
-      # if the rename is a noop, abort
+      # if the rename is a NOOP, abort
       if source_dir == target_dir and source_name == target_name
         return false
       end
