@@ -538,6 +538,16 @@ context "Renames directory traversal" do
     FileUtils.rm_rf(@path)
   end
 
+  test "rename aborts on nil" do
+    cd = {:message => "def"}
+    res = @wiki.rename_page(@wiki.page("some-super-fake-page"), "B", cd)
+    assert !res, "rename did not abort with non-existant page"
+    res = @wiki.rename_page(@wiki.page("B"), "", cd)
+    assert !res, "rename did not abort with empty rename"
+    res = @wiki.rename_page(@wiki.page("B"), nil, cd)
+    assert !res, "rename did not abort with nil rename"
+  end
+
   test "rename page no-act" do
     # Make sure renames don't do anything if the name is the same.
     cd = {:message => "def"}

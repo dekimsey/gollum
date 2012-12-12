@@ -327,6 +327,9 @@ module Gollum
     # Gollum::Committer instance if this is part of a batch update.
     # Returns false if the operation is a NOOP.
     def rename_page(page, rename, commit = {})
+      return false if page.nil?
+      return false if rename.nil? or rename.empty?
+
       (target_dir, target_name) = ::File.split(rename)
       (source_dir, source_name) = ::File.split(page.path)
       source_name = page.filename_stripped
