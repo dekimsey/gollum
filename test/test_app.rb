@@ -168,6 +168,28 @@ context "Frontend" do
     assert_not_equal page_1.version.sha, page_2.version.sha
   end
 
+  test "renames page catches invalid page" do
+    # No such page
+    post "/rename/no-such-file-here", :rename => "/C", :message => 'def'
+    assert !last_response.ok?
+    assert last_response.status, 500
+  end
+
+  test "rename page catches empty target" do
+    # Empty rename target
+    post "/rename/B", :rename => "", :message => 'def'
+    assert !last_response.ok?
+    assert last_response.status, 500
+  end
+
+  test "rename page catches non-existent target" do
+    # Non-existent rename target
+    post "/rename/B", :message => 'def'
+    assert !last_response.ok?
+    assert last_response.status, 500
+  end
+
+
   test "renames page in subdirectory" do
     page_1 = @wiki.paged("H", "G")
     assert_not_equal page_1, nil

@@ -144,10 +144,12 @@ module Precious
 
     post '/rename/*' do
       wikip     = wiki_page(params[:splat].first)
-      return if wikip.nil?
+      halt 500 if wikip.nil?
       wiki      = wikip.wiki
       page      = wiki.paged(wikip.name, wikip.path, exact = true)
       rename    = params[:rename]
+      halt 500 if page.nil?
+      halt 500 if rename.nil? or rename.empty?
 
       # Fixup the rename if it is a relative path
       # In 1.8.7 rename[0] != rename[0..0]
