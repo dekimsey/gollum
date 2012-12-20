@@ -415,7 +415,8 @@ module Precious
     # message is sourced from the incoming request parameters
     # author details are sourced from the session, to be populated by rack middleware ahead of us
     def commit_message
-      commit_message = { :message => params[:message] }
+      msg = (params[:message].nil? or params[:message].empty?) ? "[no message]" : params[:message]
+      commit_message = { :message => msg }
       author_parameters = session['gollum.author']
       commit_message.merge! author_parameters unless author_parameters.nil?
       commit_message
