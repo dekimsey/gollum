@@ -386,6 +386,7 @@ module Precious
       path = extract_path(fullpath) || '/'
 
       if page = wiki.paged(name, path, exact = true)
+	last_modified(page.date)
         @page = page
         @name = name
         @content  = page.formatted_data
@@ -399,6 +400,7 @@ module Precious
         
         mustache :page
       elsif file = wiki.file(fullpath)
+	last_modified(file.date)
         content_type file.mime_type
         file.raw_data
       else

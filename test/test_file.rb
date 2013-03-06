@@ -19,6 +19,8 @@ context "File" do
     assert_equal 'todo.txt',         file.name
     assert_equal commit.id,          file.version.id
     assert_equal commit.author.name, file.version.author.name
+    expected_time = DateTime.parse('Sun Apr 11 15:02:41 -0400 2010').strftime('%s').to_i
+    assert_equal expected_time, file.date.to_i
   end
 
   test "accessing tree" do

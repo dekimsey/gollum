@@ -68,6 +68,19 @@ module Gollum
       self
     end
 
+    # Public: The last authored date for the File 
+    #
+    # Returns the Time object this file was last authored.
+    attr_reader :date
+    def date
+      if not @date
+        author_dt = @wiki.repo.git.native "log", {:format => "%at"}, "-1", "--", @path
+        author_dt = author_dt.chomp
+        @date = Time.at(author_dt.to_i)
+      end 
+      @date
+    end
+
     #########################################################################
     #
     # Internal Methods

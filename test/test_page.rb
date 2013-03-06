@@ -195,6 +195,14 @@ context "Page" do
     assert_equal "/foo", Gollum::BlobEntry.normalize_dir("foo")
     assert_equal "/foo", Gollum::BlobEntry.normalize_dir("/foo")
   end
+
+  test "get valid date on a page" do
+    # Because of course there are two Time and Date/DateTime classes in Ruby.
+    # And they differ in functionality between 1.8.7 and 1.9.x
+    # so we compare in unix time (this also deals with timezones).
+    expected_time = DateTime.parse('Tue Jul 06 21:39:11 -0400 2010').strftime('%s').to_i
+    assert_equal expected_time, @wiki.page('Bilbo Baggins').date.to_i
+  end
 end
 
 context "within a sub-directory" do
